@@ -14,12 +14,23 @@ interface rtnProps {
 
 const Home = () => {
   const [data, setData] = useState<any[]>([]);
-  const [collection, setCollection] = useState('CL0');
+  const [collection, setCollection] = useState('ALL');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Helper function to convert string to Pascal Case
+  const toPascalCase = (str: string) => {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map((word) => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
+  };
+
   // Helper function to fetch products
-  const fetchProducts = async (productCategory: number, isBlueLight: boolean) => {
-    const response = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', {
+  const fetchProducts = async (productCategory: number, isBlueLight: boolean, collectionCode?: string) => {
+    const payload: any = {
       sort_by: { key: 'new_arrival', order: 'desc' },
       fit: [],
       frame_shape: [],
@@ -28,13 +39,19 @@ const Home = () => {
       face_shape: [],
       gender: [],
       prices: [],
-      collection,
       collaborations: [],
       product_category: productCategory,
       is_special_collaboration: false,
       is_blue_light: isBlueLight,
       page: 1,
-    });
+    };
+
+    // Add collection parameter if provided
+    if (collectionCode) {
+      payload.collection = collectionCode;
+    }
+
+    const response = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', payload);
 
     let allProducts: any[] = [];
 
@@ -43,10 +60,24 @@ const Home = () => {
       const adaptedResponse = products.flatMap((product: any) => product.variants);
       const allVariantsWithFrameName = adaptedResponse.map((variant: any) => {
         const frame = products.find((product: any) => product.frame_code.includes(variant.sku_code.slice(0, 6)));
+        let description = frame.frame_description &&
+          frame.frame_description.trim() !== '' &&
+          frame.frame_description.trim() !== '-' &&
+          frame.frame_description.trim() !== '0' &&
+          frame.frame_description.trim().toUpperCase() !== '[NULL]'
+          ? frame.frame_description
+          : frame.frame_name;
+
+        // Extract only first sentence if description is long
+        if (description !== frame.frame_name && description.includes('\n')) {
+          // Get first line or sentence before newline
+          description = description.split('\n')[0].trim();
+        }
+
         return {
           id: variant.sku_code,
-          title: frame.frame_name,
-          description: frame.frame_description ? frame.frame_description : frame.frame_name,
+          title: toPascalCase(frame.frame_name),
+          description: description,
           availabilty: 'in stock',
           condition: 'new',
           price: `${variant.retail_price}.00 IDR`,
@@ -76,7 +107,7 @@ const Home = () => {
       if (response.data.data.pages > 1) {
         const pagesLength = response.data.data.pages;
         for (let i = 0; i < pagesLength; i++) {
-          const responseNew = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', {
+          const paginationPayload: any = {
             sort_by: { key: 'new_arrival', order: 'desc' },
             fit: [],
             frame_shape: [],
@@ -85,22 +116,42 @@ const Home = () => {
             face_shape: [],
             gender: [],
             prices: [],
-            collection,
             collaborations: [],
             product_category: productCategory,
             is_special_collaboration: false,
             is_blue_light: isBlueLight,
             page: i + 1,
-          });
+          };
+
+          // Add collection parameter if provided
+          if (collectionCode) {
+            paginationPayload.collection = collectionCode;
+          }
+
+          const responseNew = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', paginationPayload);
 
           const productsNew = responseNew.data.data.products;
           const adaptedResponseNew = productsNew.flatMap((product: any) => product.variants);
           const allVariantsWithFrameNameNew = adaptedResponseNew.map((variant: any) => {
             const frameNew = productsNew.find((product: any) => product.frame_code.includes(variant.sku_code.slice(0, 6)));
+            let description = frameNew.frame_description &&
+              frameNew.frame_description.trim() !== '' &&
+              frameNew.frame_description.trim() !== '-' &&
+              frameNew.frame_description.trim() !== '0' &&
+              frameNew.frame_description.trim().toUpperCase() !== '[NULL]'
+              ? frameNew.frame_description
+              : frameNew.frame_name;
+
+            // Extract only first sentence if description is long
+            if (description !== frameNew.frame_name && description.includes('\n')) {
+              // Get first line or sentence before newline
+              description = description.split('\n')[0].trim();
+            }
+
             return {
               id: variant.sku_code,
-              title: frameNew.frame_name,
-              description: frameNew.frame_description ? frameNew.frame_description : frameNew.frame_name,
+              title: toPascalCase(frameNew.frame_name),
+              description: description,
               availabilty: 'in stock',
               condition: 'new',
               price: `${variant.retail_price}.00 IDR`,
@@ -154,29 +205,32 @@ const Home = () => {
         let rtn: rtnProps = { eyeglasses: [], sunglasses: [] };
         setIsLoading(true);
 
-        // For CL4, fetch both is_blue_light false and true
-        if (collection === 'CL4') {
-          // Fetch eyeglasses with is_blue_light: false
-          const eyeglassesFalse = await fetchProducts(1, false);
+        if (collection === 'ALL') {
+          // For ALL, send empty string as collection
+          const eyeglasses = await fetchProducts(1, false, '');
+          rtn.eyeglasses.push(...eyeglasses);
+
+          const sunglasses = await fetchProducts(2, false, '');
+          rtn.sunglasses.push(...sunglasses);
+        } else if (collection === 'CL4') {
+          // For CL4, fetch both is_blue_light false and true
+          const eyeglassesFalse = await fetchProducts(1, false, collection);
           rtn.eyeglasses.push(...eyeglassesFalse);
 
-          // Fetch eyeglasses with is_blue_light: true
-          const eyeglassesTrue = await fetchProducts(1, true);
+          const eyeglassesTrue = await fetchProducts(1, true, collection);
           rtn.eyeglasses.push(...eyeglassesTrue);
 
-          // Fetch sunglasses with is_blue_light: false
-          const sunglassesFalse = await fetchProducts(2, false);
+          const sunglassesFalse = await fetchProducts(2, false, collection);
           rtn.sunglasses.push(...sunglassesFalse);
 
-          // Fetch sunglasses with is_blue_light: true
-          const sunglassesTrue = await fetchProducts(2, true);
+          const sunglassesTrue = await fetchProducts(2, true, collection);
           rtn.sunglasses.push(...sunglassesTrue);
         } else {
           // For other collections, fetch with is_blue_light: false only
-          const eyeglasses = await fetchProducts(1, false);
+          const eyeglasses = await fetchProducts(1, false, collection);
           rtn.eyeglasses.push(...eyeglasses);
 
-          const sunglasses = await fetchProducts(2, false);
+          const sunglasses = await fetchProducts(2, false, collection);
           rtn.sunglasses.push(...sunglasses);
         }
 
@@ -227,6 +281,21 @@ const Home = () => {
                     Select Collection
                   </Form.Label>
                   <div className="d-flex gap-2 flex-wrap">
+                    <Button
+                      onClick={() => setCollection('ALL')}
+                      disabled={isLoading}
+                      style={{
+                        backgroundColor: collection === 'ALL' ? 'rgba(19, 59, 100, 1)' : '#fff',
+                        color: collection === 'ALL' ? '#fff' : '#000',
+                        border: '1px solid #dee2e6',
+                        borderRadius: '6px',
+                        padding: '8px 16px',
+                        fontSize: '0.9rem',
+                        fontWeight: '500'
+                      }}
+                    >
+                      All
+                    </Button>
                     <Button
                       onClick={() => setCollection('CL0')}
                       disabled={isLoading}
@@ -344,18 +413,19 @@ const Home = () => {
                 </div>
 
                 {/* Export Button */}
-                <div className="d-grid">
+                <div className="text-center">
                   <Button
                     onClick={exportToExcel}
                     disabled={isLoading || data.length === 0}
                     style={{
                       backgroundColor: 'rgba(19, 59, 100, 1)',
                       border: 'none',
-                      borderRadius: '6px',
-                      padding: '12px',
+                      borderRadius: '25px',
+                      padding: '12px 40px',
                       fontSize: '0.95rem',
                       fontWeight: '500',
-                      color: '#fff'
+                      color: '#fff',
+                      minWidth: '150px'
                     }}
                   >
                     {isLoading ? (

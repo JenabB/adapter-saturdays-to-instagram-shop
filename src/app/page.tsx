@@ -1,113 +1,318 @@
-import Image from "next/image";
+'use client'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import * as XLSX from 'xlsx';
+import modifyURL from '@/utils/modifyUrl';
+import getVariantImage from '@/utils/getVariantImage';
+import getCollectionCode from '@/utils/getCollectionCode';
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+interface rtnProps {
+  eyeglasses: any[];
+  sunglasses: any[];
 }
+
+const Home = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [collection, setCollection] = useState('CL0');
+  const [isLoading, setIsLoading] = useState(false);
+
+  function removeDuplicateObjectsById(arr: any[]): any[] {
+    let seen: { [key: string]: boolean } = {};
+    let result: any[] = [];
+    let len: number = arr.length;
+    let j: number = 0;
+
+    for (let i = 0; i < len; i++) {
+      let item: any = arr[i];
+      // Jika ID belum pernah ditemukan sebelumnya, tambahkan ke hasil
+      if (!seen[item.id]) {
+        seen[item.id] = true;
+        result[j++] = item;
+      }
+    }
+
+    return result;
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+
+      try {
+        let rtn: rtnProps = { eyeglasses: [], sunglasses: [], };
+
+        setIsLoading(true)
+        //eyeglasess
+        const response = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', {
+          sort_by: { key: 'new_arrival', order: 'desc' },
+          fit: [],
+          frame_shape: [],
+          material: [],
+          color: [],
+          face_shape: [],
+          gender: [],
+          prices: [],
+          collection,
+          collaborations: [],
+          product_category: 1,
+          is_special_collaboration: false,
+          page: 1,
+        });
+
+        if (response.data.data.products.length) {
+          const products = response.data.data.products;
+          const adaptedResponse = products.flatMap((product: any) => product.variants);
+          const allVariantsWithFrameName = adaptedResponse.map((variant: any) => {
+            const frame = products.find((product: any) => product.frame_code.includes(variant.sku_code.slice(0, 6)));
+            return {
+              id: variant.sku_code,
+              title: frame.frame_name,
+              description: frame.frame_description ? frame.frame_description : frame.frame_name,
+              availabilty: 'in stock',
+              condition: 'new',
+              price: `${variant.retail_price}.00 IDR`,
+              link: `https://saturdays.com/product/${variant.product_category === 1 ? 'eyeglasses' : 'sunglasses'}/${modifyURL(frame.frame_name)}/${modifyURL(variant.variant_name)}`,
+              image_link: getVariantImage(variant.base_url, variant.images),
+              brand: getCollectionCode(frame.collection.collection_code),
+              google_product_category: variant.product_category === 1 ? 524 : 178,
+              fb_product_category: 388,
+              quantity_to_sell_on_facebook: null,
+              sale_price: null,
+              sale_price_effective_date: null,
+              item_group_id: `${frame.frame_name}_${variant.product_category === 1 ? 'Eyeglass' : 'Sunglass'}`,
+              gender: frame.gender,
+              color: variant.variant_name,
+              size: variant.size_label,
+              age_group: null,
+              material: frame.material,
+              pattern: null,
+              shipping: null,
+              shipping_weight: null
+            }
+          });
+          // setData(allVariantsWithFrameName);
+
+          if (response.data.data.pages > 1) {
+            let additionalFrames = []
+            const pagesLength = response.data.data.pages
+            for (let i = 0; i < pagesLength; i++) {
+              console.log({ i, pagesLength })
+              const responseNew = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', {
+                sort_by: { key: 'new_arrival', order: 'desc' },
+                fit: [],
+                frame_shape: [],
+                material: [],
+                color: [],
+                face_shape: [],
+                gender: [],
+                prices: [],
+                collection,
+                collaborations: [],
+                product_category: 1,
+                is_special_collaboration: false,
+                page: i + 1,
+              });
+
+              const productsNew = responseNew.data.data.products;
+              const adaptedResponseNew = productsNew.flatMap((product: any) => product.variants);
+              const allVariantsWithFrameNameNew = adaptedResponseNew.map((variant: any) => {
+                const frameNew = productsNew.find((product: any) => product.frame_code.includes(variant.sku_code.slice(0, 6)));
+                return {
+                  id: variant.sku_code,
+                  title: frameNew.frame_name,
+                  description: frameNew.frame_description ? frameNew.frame_description : frameNew.frame_name,
+                  availabilty: 'in stock',
+                  condition: 'new',
+                  price: `${variant.retail_price}.00 IDR`,
+                  link: `https://saturdays.com/product/${variant.product_category === 1 ? 'eyeglasses' : 'sunglasses'}/${modifyURL(frameNew.frame_name)}/${modifyURL(variant.variant_name)}`,
+                  image_link: getVariantImage(variant.base_url, variant.images),
+                  brand: getCollectionCode(frameNew.collection.collection_code),
+                  google_product_category: variant.product_category === 1 ? 524 : 178,
+                  fb_product_category: 388,
+                  quantity_to_sell_on_facebook: null,
+                  sale_price: null,
+                  sale_price_effective_date: null,
+                  item_group_id: `${frameNew.frame_name}_${variant.product_category === 1 ? 'Eyeglass' : 'Sunglass'}`,
+                  gender: frameNew.gender,
+                  color: variant.variant_name,
+                  size: variant.size_label,
+                  age_group: null,
+                  material: frameNew.material,
+                  pattern: null,
+                  shipping: null,
+                  shipping_weight: null
+                }
+              });
+              console.log({ allVariantsWithFrameNameNew })
+              additionalFrames.push(...allVariantsWithFrameNameNew)
+
+            }
+            rtn.eyeglasses.push(...additionalFrames)
+            // setData(additionalFrames)
+            // console.log({ additionalFrames })
+          } else {
+            rtn.eyeglasses.push(...allVariantsWithFrameName);
+          }
+        }
+        //end of eyeglasses
+
+        const sunglassesResponse = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', {
+          sort_by: { key: 'new_arrival', order: 'desc' },
+          fit: [],
+          frame_shape: [],
+          material: [],
+          color: [],
+          face_shape: [],
+          gender: [],
+          prices: [],
+          collection,
+          collaborations: [],
+          product_category: 2,
+          is_special_collaboration: false,
+          page: 1,
+        });
+
+        if (sunglassesResponse.data.data.products.length) {
+          const products = sunglassesResponse.data.data.products;
+          const adaptedResponse = products.flatMap((product: any) => product.variants);
+          const allVariantsWithFrameName = adaptedResponse.map((variant: any) => {
+            const frame = products.find((product: any) => product.frame_code.includes(variant.sku_code.slice(0, 6)));
+            return {
+              id: variant.sku_code,
+              title: frame.frame_name,
+              description: frame.frame_description ? frame.frame_description : frame.frame_name,
+              availabilty: 'in stock',
+              condition: 'new',
+              price: `${variant.retail_price}.00 IDR`,
+              link: `https://saturdays.com/product/${variant.product_category === 1 ? 'eyeglasses' : 'sunglasses'}/${modifyURL(frame.frame_name)}/${modifyURL(variant.variant_name)}`,
+              image_link: getVariantImage(variant.base_url, variant.images),
+              brand: getCollectionCode(frame.collection.collection_code),
+              google_product_category: variant.product_category === 1 ? 524 : 178,
+              fb_product_category: 388,
+              quantity_to_sell_on_facebook: null,
+              sale_price: null,
+              sale_price_effective_date: null,
+              item_group_id: `${frame.frame_name}_${variant.product_category === 1 ? 'Eyeglass' : 'Sunglass'}`,
+              gender: frame.gender,
+              color: variant.variant_name,
+              size: variant.size_label,
+              age_group: null,
+              material: frame.material,
+              pattern: null,
+              shipping: null,
+              shipping_weight: null
+            }
+          });
+          // setData(allVariantsWithFrameName);
+
+          if (sunglassesResponse.data.data.pages > 1) {
+            let additionalFrames = []
+            const pagesLength = sunglassesResponse.data.data.pages
+            for (let i = 0; i < pagesLength; i++) {
+              console.log({ i, pagesLength })
+              const responseNew = await axios.post('https://beta.api.saturdays.com/api/v1/catalogue/filteredProduct', {
+                sort_by: { key: 'new_arrival', order: 'desc' },
+                fit: [],
+                frame_shape: [],
+                material: [],
+                color: [],
+                face_shape: [],
+                gender: [],
+                prices: [],
+                collection,
+                collaborations: [],
+                product_category: 2,
+                is_special_collaboration: false,
+                page: i + 1,
+              });
+
+              const productsNew = responseNew.data.data.products;
+              const adaptedResponseNew = productsNew.flatMap((product: any) => product.variants);
+              const allVariantsWithFrameNameNew = adaptedResponseNew.map((variant: any) => {
+                const frameNew = productsNew.find((product: any) => product.frame_code.includes(variant.sku_code.slice(0, 6)));
+                return {
+                  id: variant.sku_code,
+                  title: frameNew.frame_name,
+                  description: frameNew.frame_description ? frameNew.frame_description : frameNew.frame_name,
+                  availabilty: 'in stock',
+                  condition: 'new',
+                  price: `${variant.retail_price}.00 IDR`,
+                  link: `https://saturdays.com/product/${variant.product_category === 1 ? 'eyeglasses' : 'sunglasses'}/${modifyURL(frameNew.frame_name)}/${modifyURL(variant.variant_name)}`,
+                  image_link: getVariantImage(variant.base_url, variant.images),
+                  brand: getCollectionCode(frameNew.collection.collection_code),
+                  google_product_category: variant.product_category === 1 ? 524 : 178,
+                  fb_product_category: 388,
+                  quantity_to_sell_on_facebook: null,
+                  sale_price: null,
+                  sale_price_effective_date: null,
+                  item_group_id: `${frameNew.frame_name}_${variant.product_category === 1 ? 'Eyeglass' : 'Sunglass'}`,
+                  gender: frameNew.gender,
+                  color: variant.variant_name,
+                  size: variant.size_label,
+                  age_group: null,
+                  material: frameNew.material,
+                  pattern: null,
+                  shipping: null,
+                  shipping_weight: null
+                }
+              });
+              console.log({ allVariantsWithFrameNameNew })
+              additionalFrames.push(...allVariantsWithFrameNameNew)
+
+            }
+            rtn.sunglasses.push(...additionalFrames)
+            // setData(additionalFrames)
+            // console.log({ additionalFrames })
+          } else {
+            rtn.sunglasses.push(...allVariantsWithFrameName);
+          }
+        }
+
+
+        setIsLoading(false)
+
+        console.log({ rtn, lengthEye: rtn.eyeglasses.length, lengthSun: rtn.sunglasses.length })
+        setData(removeDuplicateObjectsById([...rtn.eyeglasses, ...rtn.sunglasses]))
+
+      } catch (error) {
+        setIsLoading(false);
+        console.error('Error:', error);
+      }
+    };
+    fetchData();
+  }, [collection]);
+
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, `${collection}.xlsx`);
+  };
+
+  return (
+    <div className='p-4'>
+      <h1>Convert Data from server to Meta Pixel</h1>
+      <div className=' py-2 flex space-x-4'>
+        <div>
+          <select className='bg-blue-900 text-white px-3 py-2 rounded-md' onChange={((e) => setCollection(e.target.value))}>
+            <option value="CL0">Classic</option>
+            <option value="CL1">Vibe</option>
+            <option value="CL2">Junior</option>
+            <option value='CL3'>Active</option>
+          </select>
+        </div>
+
+      </div>
+      <div className='m-0 font-bold'>
+        {isLoading ? <h1>Counting...</h1> : <h1>We found {data.length} frames</h1>}
+      </div>
+      <div className='py-4'>
+        {isLoading ? <button>Loading...</button> : <button className='bg-blue-400 text-white px-3 py-2 rounded-md' onClick={exportToExcel}>export {data.length} frames to excel</button>}
+      </div>
+      {/* <div className='py-2'>
+        <button className='bg-blue-400 text-white px-3 py-2 rounded-md' onClick={exportToExcel}>export ALL frames to excel</button>
+      </div> */}
+    </div>
+  )
+}
+
+export default Home
